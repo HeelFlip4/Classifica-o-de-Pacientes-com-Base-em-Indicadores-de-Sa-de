@@ -1,84 +1,105 @@
-# Escopo do Trabalho - Classificação de Pacientes com Base em Indicadores de Saúde
+### Explicação do Enunciado: Classificação de Pacientes com Base em Indicadores de Saúde  
 
-## 1. Introdução
-Este projeto tem como objetivo desenvolver um sistema em C++ para classificar pacientes entre saudáveis e doentes, utilizando a distância euclidiana entre indicadores clínicos. O sistema será implementado de forma modular, sem uso de containers da STL, garantindo uma abordagem eficiente e estruturada.
+O objetivo do trabalho é desenvolver um sistema em C++ que classifique pacientes entre **saudáveis** e **doentes**, com base em dados clínicos fornecidos. Esse sistema deve usar um **modelo de classificação baseado na distância euclidiana**, comparando um novo paciente com um histórico de 10 pacientes anteriores.
 
-## 2. Requisitos
-### 2.1 Requisitos Gerais
-- Implementação em C++ puro, sem o uso de containers como `vector`, `queue`, `list`, etc.
-- Uso apenas da biblioteca padrão do C++.
-- Código modularizado, utilizando funções para organização do código.
-- Entrada de dados validada conforme especificação do problema.
-- Exibição da matriz formatada no console.
+---
 
-### 2.2 Requisitos da Matriz de Pacientes
-- A matriz será alocada estaticamente.
-- Dimensões da matriz:
-  - 11 linhas (10 pacientes históricos + 1 novo paciente)
-  - Entre 3 e 7 colunas de indicadores clínicos (definido pelo usuário no início da execução).
-- A última coluna representa a classificação:
-  - `1.0` para pacientes saudáveis.
-  - `-1.0` para pacientes doentes.
-  - O novo paciente (linha 11) não possui classificação definida a princípio.
+### **1. Estrutura da Tabela de Pacientes**  
+O sistema trabalhará com uma **matriz de números do tipo `float`**, onde:  
 
-## 3. Estrutura do Programa
-### 3.1 Declaração de Variáveis
-- Uma matriz `pacientes[11][N]` (com `N` entre 3 e 7) para armazenar os dados dos pacientes.
-- Uma variável `N` para armazenar o número de colunas.
-- Um vetor auxiliar para armazenar as distâncias calculadas.
+- **Cada linha representa um paciente.**  
+- **Cada coluna representa um indicador clínico**, como pressão arterial, glicose no sangue e frequência cardíaca.  
+- A **última coluna** sempre contém o valor de classificação do paciente:  
+  - `1.0` → Paciente saudável  
+  - `-1.0` → Paciente doente  
 
-### 3.2 Funções Principais
-1. **`void solicitarDimensao(int &N);`**
-   - Solicita ao usuário o número de indicadores clínicos.
-   - Valida se `N` está no intervalo permitido (3 a 7).
+Exemplo de tabela com 3 pacientes e 4 indicadores clínicos:  
 
-2. **`void preencherMatriz(float matriz[11][7], int N);`**
-   - Preenche a matriz com dados de entrada.
-   - Garante que a última coluna contenha apenas `1.0` ou `-1.0` para as 10 primeiras linhas.
-   - Permite entrada manual dos dados ou leitura de um arquivo de entrada.
+| Indicador 1 | Indicador 2 | Indicador 3 | Indicador 4 | Classificação |
+|-------------|-------------|-------------|-------------|--------------|
+| 0.5         | 0.3         | 0.2         | 0.5         | 1.0          |
+| 2.0         | 0.8         | 3.0         | 5.2         | -1.0         |
+| 1.8         | 2.1         | 0.7         | 0.9         | 1.0          |
 
-3. **`void exibirMatriz(float matriz[11][7], int N);`**
-   - Exibe a matriz formatada na tela.
+Além dos 10 pacientes históricos, a **última linha da matriz será reservada para um novo paciente**, que ainda não tem uma classificação definida.  
 
-4. **`float calcularDistancia(float paciente1[], float paciente2[], int N);`**
-   - Calcula a distância euclidiana entre dois pacientes, considerando apenas as colunas de indicadores.
+Exemplo com um novo paciente ainda não classificado:  
 
-5. **`void classificarPaciente(float matriz[11][7], int N);`**
-   - Calcula a distância do novo paciente (linha 11) para cada paciente histórico.
-   - Identifica o paciente histórico mais próximo.
-   - Define a classificação do novo paciente baseada na classificação do vizinho mais próximo.
-   - Exibe o resultado no console.
+| Indicador 1 | Indicador 2 | Indicador 3 | Indicador 4 | Classificação |
+|-------------|-------------|-------------|-------------|--------------|
+| 0.5         | 0.3         | 0.2         | 0.5         | 1.0          |
+| 2.0         | 0.8         | 3.0         | 5.2         | -1.0         |
+| 1.8         | 2.1         | 0.7         | 0.9         | 1.0          |
+| 2.1         | 0.7         | 3.1         | 5.1         | ???          |
 
-## 4. Fluxo de Execução
-1. O programa solicita o número de indicadores clínicos (entre 3 e 7).
-2. A matriz é preenchida com os dados de 10 pacientes e do novo paciente.
-3. A matriz é exibida no console.
-4. A distância do novo paciente para os demais é calculada.
-5. O paciente histórico mais próximo é identificado.
-6. O novo paciente é classificado como saudável ou doente.
-7. A matriz é novamente exibida, agora com a classificação do novo paciente.
+O sistema precisa calcular a **distância euclidiana** entre esse novo paciente e os pacientes anteriores para determinar sua classificação.
 
-## 5. Saída Esperada
-O programa exibirá no console a matriz de pacientes antes e depois da classificação do novo paciente. Exemplo:
+---
 
+### **2. Como o Sistema Deve Funcionar**  
+
+1. **Entrada de Dados:**  
+   - O programa deve solicitar o número de **indicadores clínicos** (colunas), que deve ser entre **3 e 7**.  
+   - Se o usuário inserir um número fora desse intervalo, o programa deve solicitar novamente.  
+   - O número total de pacientes na tabela **deve ser 11** (10 históricos + 1 novo paciente).  
+
+2. **Cálculo da Distância Euclidiana:**  
+   A fórmula para calcular a distância entre dois pacientes **P e Q** é:  
+
+   \[
+   d(P, Q) = \sqrt{\sum_{i=1}^{N} (P_i - Q_i)^2}
+   \]
+
+   Onde:  
+   - `P_i` são os indicadores clínicos do novo paciente.  
+   - `Q_i` são os indicadores clínicos de um paciente histórico.  
+   - `N` é o número de indicadores clínicos.  
+
+   O paciente histórico que tiver a **menor distância euclidiana** em relação ao novo paciente será considerado o mais semelhante.  
+
+3. **Classificação do Novo Paciente:**  
+   - Se o paciente mais próximo for saudável (`1.0`), o novo paciente provavelmente também será **saudável**.  
+   - Se o paciente mais próximo for doente (`-1.0`), o novo paciente provavelmente também será **doente**.  
+
+4. **Exibição da Tabela Final:**  
+   Após a classificação, o programa deve exibir a matriz completa, com todos os pacientes e seus indicadores, incluindo a **classificação final do novo paciente**.
+
+---
+
+### **3. Restrições do Trabalho**
+- **A matriz deve ser alocada estaticamente** (não pode ser alocada dinamicamente).  
+- **É obrigatório modularizar o código**, ou seja, dividir em funções separadas para cada parte do programa.  
+- **É proibido o uso de containers** (`vector`, `queue`, `stack`, `list`, `map` etc.).  
+- **Só é permitido o uso da biblioteca padrão do C++** (sem bibliotecas externas).  
+- **O código deve ser bem documentado e organizado**.
+
+---
+
+### **4. Exemplo de Execução**
+#### **Entrada:**
 ```
-Tabela de Pacientes (antes da classificação):
-0.5  0.3  0.2  0.5  1.0
-2.0  0.8  3.0  5.2  -1.0
-1.8  2.1  0.7  0.9  1.0
+Digite o número de indicadores clínicos (entre 3 e 7): 4
+Digite os dados dos 10 pacientes históricos:
 ...
-2.1  0.7  3.1  5.1  ???
-
-O novo paciente foi classificado como: DOENTE
-
-Tabela de Pacientes (após a classificação):
-0.5  0.3  0.2  0.5  1.0
-2.0  0.8  3.0  5.2  -1.0
-1.8  2.1  0.7  0.9  1.0
+Digite os dados do novo paciente:
 ...
-2.1  0.7  3.1  5.1  -1.0
 ```
 
-## 6. Conclusão
-Este escopo detalha a implementação de um classificador de pacientes usando distância euclidiana em C++, atendendo rigorosamente aos requisitos do trabalho. A modularização facilita a manutenção e compreensão do código, garantindo clareza e eficiência no processamento dos dados clínicos.
+#### **Saída esperada:**
+```
+Tabela de Pacientes:
+------------------------------------------------
+| Indicador 1 | Indicador 2 | Indicador 3 | Indicador 4 | Classificação |
+------------------------------------------------
+| 0.5         | 0.3         | 0.2         | 0.5         | 1.0           |
+| 2.0         | 0.8         | 3.0         | 5.2         | -1.0          |
+| 1.8         | 2.1         | 0.7         | 0.9         | 1.0           |
+| 2.1         | 0.7         | 3.1         | 5.1         | 1.0 (Saudável) |
+------------------------------------------------
+```
+O novo paciente foi classificado como **saudável (1.0)** porque o paciente mais próximo no histórico era saudável.
 
+---
+
+### **Conclusão**
+O trabalho consiste em implementar um **sistema de triagem médica simples** baseado na **distância euclidiana** entre pacientes, garantindo que todos os requisitos sejam seguidos com rigor. O foco está na correta manipulação da matriz, no cálculo matemático e na modularização do código em C++.
